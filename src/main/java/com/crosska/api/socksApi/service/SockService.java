@@ -11,7 +11,9 @@ public interface SockService {
 
     ResponseEntity<?> removeSock(Sock sock);
 
-    List<Sock> readAll();
+    ResponseEntity<?> getSocksAmount(String[] parameters);
+
+    List<Sock> getAllSocks();
 
     boolean updateSock(Sock sock, int id);
 
