@@ -1,15 +1,32 @@
 package com.crosska.api.socksApi.model;
 
+import javax.persistence.*;
+
+@Entity
+@Table(name = "socks")
 public class Sock {
 
-    private Integer id;
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @Column(name = "color")
     private String color;
+
+    @Column(name = "cotton")
     private int cotton;
+
+    @Column(name = "amount")
     private int amount;
 
-    public Sock() {
-        amount = 0;
+    public Sock(String color, int cotton, int amount) {
+        this.color = color;
+        this.cotton = cotton;
+        this.amount = amount;
     }
+
+    public Sock() {}
 
     public Integer getId() {
         return id;

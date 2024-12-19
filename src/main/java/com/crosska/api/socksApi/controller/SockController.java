@@ -15,7 +15,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLOutput;
 
 @RestController // Говорим спрингу, что данный класс это REST контроллер (логика обработки клиентских запросов)
 public class SockController {
@@ -61,7 +60,7 @@ public class SockController {
     }
 
     @GetMapping(value = "/api/socks/all")
-    public ResponseEntity<?> read() {
+    public ResponseEntity<?> readAll() {
         return ResponseEntity.status(HttpStatus.OK).body(sockService.getAllSocks());
     }
 
