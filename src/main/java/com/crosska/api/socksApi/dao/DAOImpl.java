@@ -6,9 +6,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
-import java.util.LongSummaryStatistics;
 
 @Repository
 public class DAOImpl implements DAO {
@@ -74,6 +72,34 @@ public class DAOImpl implements DAO {
             String hql = "select sum(s.amount) FROM Sock s";
             Query<Long> query = session.createQuery(hql, Long.class);
             return query.getSingleResult();
+        }
+    }
+
+    public List<Sock> findBetweenSort(int start, int end, String sortBy) {
+        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+            String hql = "FROM Sock c WHERE c.cotton BETWEEN :start AND :end ORDER BY c." + sortBy;
+            Query<Sock> query = session.createQuery(hql, Sock.class);
+            query.setParameter("start", start);
+            query.setParameter("end", end);
+            return query.getResultList();
+        }
+    }
+
+    public List<Sock> findBetween(int start, int end) {
+        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+            String hql = "FROM Sock c WHERE c.cotton BETWEEN :start AND :end";
+            Query<Sock> query = session.createQuery(hql, Sock.class);
+            query.setParameter("start", start);
+            query.setParameter("end", end);
+            return query.getResultList();
+        }
+    }
+
+    public List<Sock> findSort(String sortBy) {
+        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+            String hql = "FROM Sock c ORDER BY c." + sortBy;
+            Query<Sock> query = session.createQuery(hql, Sock.class);
+            return query.getResultList();
         }
     }
 

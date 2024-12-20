@@ -2,7 +2,7 @@ package com.crosska.api.socksApi.service;
 
 import com.crosska.api.socksApi.dao.DAOImpl;
 import com.crosska.api.socksApi.model.Sock;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -12,11 +12,11 @@ import java.util.*;
 @Service
 public class SockServiceImpl implements SockService {
 
-    private final DAOImpl daoImpl = new DAOImpl();
-    private final DataSourceTransactionManagerAutoConfiguration dataSourceTransactionManagerAutoConfiguration;
+    @Autowired
+    private final DAOImpl daoImpl;
 
-    public SockServiceImpl(DataSourceTransactionManagerAutoConfiguration dataSourceTransactionManagerAutoConfiguration) {
-        this.dataSourceTransactionManagerAutoConfiguration = dataSourceTransactionManagerAutoConfiguration;
+    public SockServiceImpl(DAOImpl daoImpl) {
+       this.daoImpl = daoImpl;
     }
 
     @Override
@@ -90,6 +90,17 @@ public class SockServiceImpl implements SockService {
         }
         long sumAmount = daoImpl.findManyWithoutParameters();
         return ResponseEntity.status(HttpStatus.OK).body(sumAmount);
+    }
+
+    public ResponseEntity<?> getSocksFilter(String sortBy, int[] betweenParameters) {
+        if (sortBy == null && (betweenParameters[0] > 0 && betweenParameters[1] > 0)) {
+            return ResponseEntity.status(HttpStatus.OK).body(daoImpl.findBetween(betweenParameters[0], betweenParameters[1]));
+        } else if (sortBy != null && (betweenParameters[0] <= 0 || betweenParameters[1] <= 0)) {
+            return ResponseEntity.status(HttpStatus.OK).body(daoImpl.findSort(sortBy));
+        } else if (sortBy != null) {
+            return ResponseEntity.status(HttpStatus.OK).body(daoImpl.findBetweenSort(betweenParameters[0], betweenParameters[1], sortBy));
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Параметры фильтров не указаны");
     }
 
     @Override
