@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.csv.CSVParser;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,10 +40,10 @@ public class SockController {
     public ResponseEntity<?> add(@RequestBody Sock sock) {
         if (sock.getCotton() < 0 || sock.getCotton() > 100) {
             logger.error("POST request /api/socks/income received incorrect parameter cotton");
-            return new ResponseEntity<>("Invalid cotton", HttpStatus.BAD_REQUEST);
+            throw new IllegalArgumentException();
         } else if (sock.getAmount() < 0) {
             logger.error("POST request /api/socks/income received incorrect parameter amount");
-            return new ResponseEntity<>("Invalid amount", HttpStatus.BAD_REQUEST);
+            throw new IllegalArgumentException();
         }
         logger.info("POST request /api/socks/income passed the execution on");
         return sockService.addSock(sock);
@@ -53,10 +54,10 @@ public class SockController {
     public ResponseEntity<?> remove(@RequestBody Sock sock) {
         if (sock.getCotton() < 0 || sock.getCotton() > 100) {
             logger.error("POST request /api/socks/outcome received incorrect parameter cotton");
-            return new ResponseEntity<>("Invalid cotton", HttpStatus.BAD_REQUEST);
+            throw new IllegalArgumentException();
         } else if (sock.getAmount() < 0) {
             logger.error("POST request /api/socks/outcome received incorrect parameter amount");
-            return new ResponseEntity<>("Invalid amount", HttpStatus.BAD_REQUEST);
+            throw new IllegalArgumentException();
         }
         logger.info("POST request /api/socks/outcome passed the execution on");
         return sockService.removeSock(sock);
@@ -107,7 +108,7 @@ public class SockController {
             logger.info("GET request /api/socks/filter passed the execution on");
             return sockService.getSocksFilter(parameterSortBy, betweenParameters);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Необходимые значения не были переданы");
+            throw new IllegalArgumentException();
         }
     }
 
@@ -125,10 +126,10 @@ public class SockController {
             @PathVariable(name = "id") int id, @RequestBody Sock sock) {
         if (sock.getCotton() < 0 || sock.getCotton() > 100) {
             logger.error("PUT request /api/socks/{id}} received incorrect parameter cotton");
-            return new ResponseEntity<>("Invalid cotton", HttpStatus.BAD_REQUEST);
+            throw new IllegalArgumentException();
         } else if (sock.getAmount() < 0) {
             logger.error("PUT request /api/socks/{id}} received incorrect parameter amount");
-            return new ResponseEntity<>("Invalid amount", HttpStatus.BAD_REQUEST);
+            throw new IllegalArgumentException();
         }
         logger.info("PUT request /api/socks/{id} passed the execution on");
         if (sockService.updateSock(sock, id)) {
@@ -144,10 +145,10 @@ public class SockController {
     @PostMapping("/api/socks/batch")
     public ResponseEntity<?> batchRead(
             @Parameter(description = "Multipart value which consist from .csv file (color,cotton,amount)", example = "red,70,150")
-            @RequestParam("file") MultipartFile file) {
+            @RequestParam("file") MultipartFile file) throws FileUploadException {
         if (file.isEmpty()) {
             logger.error("POST request /api/socks/batch} received incorrect file");
-            return ResponseEntity.badRequest().body("File is empty");
+            throw new FileUploadException();
         }
 
         try (BufferedReader reader = new BufferedReader(
@@ -169,10 +170,10 @@ public class SockController {
 
                 if (cotton < 0 || cotton > 100) {
                     logger.error("POST request /api/socks/batch} encountered line with incorrect cotton");
-                    return new ResponseEntity<>("Invalid cotton", HttpStatus.EXPECTATION_FAILED);
+                    throw new IllegalArgumentException("Cotton - File");
                 } else if (amount < 0) {
                     logger.error("POST request /api/socks/batch} encountered line with incorrect amount");
-                    return new ResponseEntity<>("Invalid amount", HttpStatus.EXPECTATION_FAILED);
+                    throw new IllegalArgumentException("Amount - File");
                 }
 
                 Sock sock = new Sock();
