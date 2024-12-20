@@ -2,6 +2,7 @@ package com.crosska.api.socksApi.service;
 
 import com.crosska.api.socksApi.dao.DAOImpl;
 import com.crosska.api.socksApi.model.Sock;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,11 @@ import java.util.*;
 public class SockServiceImpl implements SockService {
 
     private final DAOImpl daoImpl = new DAOImpl();
+    private final DataSourceTransactionManagerAutoConfiguration dataSourceTransactionManagerAutoConfiguration;
+
+    public SockServiceImpl(DataSourceTransactionManagerAutoConfiguration dataSourceTransactionManagerAutoConfiguration) {
+        this.dataSourceTransactionManagerAutoConfiguration = dataSourceTransactionManagerAutoConfiguration;
+    }
 
     @Override
     public ResponseEntity<?> addSock(Sock sock) {
@@ -61,45 +67,29 @@ public class SockServiceImpl implements SockService {
 
     @Override
     public ResponseEntity<?> getSocksAmount(String[] parameters) {
-        int amount = 0, cotton;
+        int cotton;
         if (parameters[0] != null && parameters[1] != null && parameters[2] != null) { // All parameters
             try {
                 cotton = Integer.parseInt(parameters[2]);
             } catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body("Вы указали неправильное число для сравнения");
             }
-            ArrayList<Sock> selectedSocks = (ArrayList<Sock>) daoImpl.findManyWithAllParameters(parameters[0], parameters[1], cotton);
-            try {
-                for (Sock sock : selectedSocks) amount = amount + sock.getAmount();
-                return ResponseEntity.status(HttpStatus.OK).body(amount);
-            } catch (NullPointerException e) {
-                return ResponseEntity.status(HttpStatus.OK).body(0);
-            }
+            long sumAmount = daoImpl.findManyWithAllParameters(parameters[0], parameters[1], cotton);
+            return ResponseEntity.status(HttpStatus.OK).body(sumAmount);
         } else if (parameters[0] == null && parameters[1] != null && parameters[2] != null) { // No color, comparison and cotton
             try {
                 cotton = Integer.parseInt(parameters[2]);
             } catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body("Вы указали неправильное число для сравнения");
             }
-            ArrayList<Sock> selectedSocks = (ArrayList<Sock>) daoImpl.findManyWithCottonParameters(parameters[1], cotton);
-            for (Sock sock : selectedSocks) amount = amount + sock.getAmount();
-            return ResponseEntity.status(HttpStatus.OK).body(amount);
+            long sumAmount = daoImpl.findManyWithCottonParameters(parameters[1], cotton);
+            return ResponseEntity.status(HttpStatus.OK).body(sumAmount);
         } else if (parameters[0] != null) { // Color, no comparison or cotton
-            ArrayList<Sock> selectedSocks = (ArrayList<Sock>) daoImpl.findManyWithColorParameters(parameters[0]);
-            try {
-                for (Sock sock : selectedSocks) amount = amount + sock.getAmount();
-                return ResponseEntity.status(HttpStatus.OK).body(amount);
-            } catch (NullPointerException e) {
-                return ResponseEntity.status(HttpStatus.OK).body(0);
-            }
+            long sumAmount = daoImpl.findManyWithColorParameters(parameters[0]);
+            return ResponseEntity.status(HttpStatus.OK).body(sumAmount);
         }
-        ArrayList<Sock> selectedSocks = (ArrayList<Sock>) daoImpl.findAll();
-        try {
-            for (Sock sock : selectedSocks) amount = amount + sock.getAmount();
-            return ResponseEntity.status(HttpStatus.OK).body(amount);
-        } catch (NullPointerException e) {
-            return ResponseEntity.status(HttpStatus.OK).body(0);
-        }
+        long sumAmount = daoImpl.findManyWithoutParameters();
+        return ResponseEntity.status(HttpStatus.OK).body(sumAmount);
     }
 
     @Override

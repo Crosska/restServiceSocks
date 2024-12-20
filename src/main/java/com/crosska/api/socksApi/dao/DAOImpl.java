@@ -5,9 +5,12 @@ import com.crosska.api.socksApi.util.HibernateSessionFactoryUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.LongSummaryStatistics;
 
+@Repository
 public class DAOImpl implements DAO {
 
     @Override
@@ -66,57 +69,65 @@ public class DAOImpl implements DAO {
         }
     }
 
-    public List<Sock> findManyWithAllParameters(String color, String comparison, int cotton) {
+    public long findManyWithoutParameters() {
+        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+            String hql = "select sum(s.amount) FROM Sock s";
+            Query<Long> query = session.createQuery(hql, Long.class);
+            return query.getSingleResult();
+        }
+    }
+
+    public long findManyWithAllParameters(String color, String comparison, int cotton) {
         try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
             String hql;
             switch (comparison) {
                 case "moreThan":
-                    hql = "FROM Sock WHERE color = :color AND cotton > :cotton";
+                    hql = "select sum(s.amount) FROM Sock s WHERE color = :color AND cotton > :cotton";
                     break;
                 case "lessThan":
-                    hql = "FROM Sock WHERE color = :color AND cotton < :cotton";
+                    hql = "select sum(s.amount) FROM Sock s WHERE color = :color AND cotton < :cotton";
                     break;
                 case "equal":
-                    hql = "FROM Sock WHERE color = :color AND cotton = :cotton";
+                    hql = "select sum(s.amount) FROM Sock s WHERE color = :color AND cotton = :cotton";
                     break;
                 default:
-                    return null;
+                    return 0;
             }
-            Query<Sock> query = session.createQuery(hql, Sock.class);
+            Query<Long> query = session.createQuery(hql, Long.class);
             query.setParameter("color", color);
             query.setParameter("cotton", cotton);
-            return query.list();
+            return query.getSingleResult();
         }
     }
 
-    public List<Sock> findManyWithCottonParameters(String comparison, int cotton) {
+    public long findManyWithCottonParameters(String comparison, int cotton) {
         try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
             String hql;
             switch (comparison) {
                 case "moreThan":
-                    hql = "FROM Sock WHERE cotton > :cotton";
+                    hql = "select sum(s.amount) FROM Sock s WHERE cotton > :cotton";
                     break;
                 case "lessThan":
-                    hql = "FROM Sock WHERE cotton < :cotton";
+                    hql = "select sum(s.amount) FROM Sock s WHERE cotton < :cotton";
                     break;
                 case "equal":
-                    hql = "FROM Sock WHERE cotton = :cotton";
+                    hql = "select sum(s.amount) FROM Sock s WHERE cotton = :cotton";
                     break;
                 default:
-                    return null;
+                    return 0;
             }
-            Query<Sock> query = session.createQuery(hql, Sock.class);
+            Query<Long> query = session.createQuery(hql, Long.class);
             query.setParameter("cotton", cotton);
-            return query.list();
+            return query.getSingleResult();
         }
     }
 
-    public List<Sock> findManyWithColorParameters(String color) {
+    public long findManyWithColorParameters(String color) {
         try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
-            String hql = "FROM Sock WHERE color = :color";
-            Query<Sock> query = session.createQuery(hql, Sock.class);
+            String hql = "select sum(s.amount) FROM Sock s WHERE color = :color";
+            Query<Long> query = session.createQuery(hql, Long.class);
             query.setParameter("color", color);
-            return query.list();
+            return query.getSingleResult();
         }
     }
 
