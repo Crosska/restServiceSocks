@@ -18,7 +18,7 @@ public class DAOImpl implements DAO {
         }
     }
 
-    public Sock findSingleByColorAndCotton(String color, int cotton) {
+    public Sock findFirstByColorAndCotton(String color, int cotton) {
         try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
             String hql = "FROM Sock WHERE color = :color AND cotton = :cotton";
             Query<Sock> query = session.createQuery(hql, Sock.class);

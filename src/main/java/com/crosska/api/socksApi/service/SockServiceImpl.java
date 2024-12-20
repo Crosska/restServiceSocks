@@ -12,19 +12,17 @@ import java.util.*;
 @Service
 public class SockServiceImpl implements SockService {
 
-    @Autowired
     private final DAOImpl daoImpl;
 
+    @Autowired
     public SockServiceImpl(DAOImpl daoImpl) {
        this.daoImpl = daoImpl;
     }
 
     @Override
     public ResponseEntity<?> addSock(Sock sock) {
-        Sock existSock = daoImpl.findSingleByColorAndCotton(sock.getColor(), sock.getCotton());
+        Sock existSock = daoImpl.findFirstByColorAndCotton(sock.getColor(), sock.getCotton());
         if (existSock != null) {
-            existSock.setColor(sock.getColor());
-            existSock.setCotton(sock.getCotton());
             existSock.setAmount(existSock.getAmount() + sock.getAmount());
             daoImpl.update(existSock);
             System.out.println("Increased existing sock amount");
@@ -42,7 +40,7 @@ public class SockServiceImpl implements SockService {
 
     @Override
     public ResponseEntity<?> removeSock(Sock sock) {
-        Sock existSock = daoImpl.findSingleByColorAndCotton(sock.getColor(), sock.getCotton());
+        Sock existSock = daoImpl.findFirstByColorAndCotton(sock.getColor(), sock.getCotton());
         if (existSock != null) {
             if (existSock.getAmount() > sock.getAmount()) {
                 existSock.setAmount(existSock.getAmount() - sock.getAmount());
@@ -92,6 +90,7 @@ public class SockServiceImpl implements SockService {
         return ResponseEntity.status(HttpStatus.OK).body(sumAmount);
     }
 
+    @Override
     public ResponseEntity<?> getSocksFilter(String sortBy, int[] betweenParameters) {
         if (sortBy == null && (betweenParameters[0] > 0 && betweenParameters[1] > 0)) {
             return ResponseEntity.status(HttpStatus.OK).body(daoImpl.findBetween(betweenParameters[0], betweenParameters[1]));

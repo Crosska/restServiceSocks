@@ -1,6 +1,7 @@
 package com.crosska.api.socksApi.controller;
 
 import com.crosska.api.socksApi.model.Sock;
+import com.crosska.api.socksApi.service.SockService;
 import com.crosska.api.socksApi.service.SockServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,13 +27,13 @@ import java.nio.charset.StandardCharsets;
 @RestController // Говорим спрингу, что данный класс это REST контроллер (логика обработки клиентских запросов)
 public class SockController {
 
-    private final SockServiceImpl sockService;
+    private final SockService sockService;
 
     private final Logger logger = LoggerFactory.getLogger(SockController.class);
 
     @Autowired
-    public SockController(SockServiceImpl sockServiceImpl) { // Внедряем зависимости через конструктор и аннотацию @Autowired
-        this.sockService = sockServiceImpl;
+    public SockController(SockService sockService) { // Внедряем зависимости через конструктор и аннотацию @Autowired
+        this.sockService = sockService;
     }
 
     @Operation(summary = "Post socks income", description = "Add new sock object with data into DataBase table socks, if that sock existed - add amount, if not - create new")

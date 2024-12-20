@@ -17,6 +17,8 @@ public interface SockService {
 
     boolean updateSock(Sock sock, int id);
 
+    ResponseEntity<?> getSocksFilter(String sortBy, int[] betweenParameters);
+
     //void uploadSockData();
 
 }
